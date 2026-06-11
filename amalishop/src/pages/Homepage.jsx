@@ -1,6 +1,30 @@
 import React from "react";
+import { useState, useEffect } from "react";
+import ProductCard from "../components/ProductCard";
+import { getFeaturedProducts } from "../api/productsApi";
 
 const Homepage = () => {
+
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      setLoading(true);
+      try {
+        const productsData = await getFeaturedProducts();
+        setFeaturedProducts(productsData);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Hero Section */}
@@ -25,69 +49,25 @@ const Homepage = () => {
           Featured Products
         </h2>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow p-4">
-            <img
-              src="https://i.pinimg.com/1200x/5c/a9/e3/5ca9e3239a9b4034374efba69283d84f.jpg"
-              alt=""
-              className="w-full h-56 object-cover rounded-lg"
+        {
+          loading && <p className="text-center text-gray-500">Loading featured products...</p>
+        }
+        {
+          error && <p className="text-center text-red-500">Error: {error}</p>
+        }
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featuredProducts.map(product => (
+            <ProductCard
+              key={product.id}
+              title={product.title.slice(0, 50) + '...'}
+              price={product.price}
+              description={product.description.slice(0, 100) + '...'}
+              image={product.image}
+              rate={product.rating.rate}
+              count={product.rating.count}
+              category={product.category}
             />
-
-            <h3 className="text-xl font-semibold mt-4">
-              Premium Headphones
-            </h3>
-
-            <p className="text-gray-500 mt-2">
-              High quality sound with modern design.
-            </p>
-
-            <div className="flex justify-between items-center mt-4">
-              <span className="font-bold">$99.99</span>
-              <span className="text-yellow-500">⭐ 4.5</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow p-4">
-            <img
-              src="https://i.pinimg.com/1200x/5c/a9/e3/5ca9e3239a9b4034374efba69283d84f.jpg"
-              alt=""
-              className="w-full h-56 object-cover rounded-lg"
-            />
-
-            <h3 className="text-xl font-semibold mt-4">
-              Smart Watch
-            </h3>
-
-            <p className="text-gray-500 mt-2">
-              Track fitness and stay connected.
-            </p>
-
-            <div className="flex justify-between items-center mt-4">
-              <span className="font-bold">$79.99</span>
-              <span className="text-yellow-500">⭐ 4.3</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow p-4">
-            <img
-              src="https://i.pinimg.com/1200x/5c/a9/e3/5ca9e3239a9b4034374efba69283d84f.jpg"
-              alt=""
-              className="w-full h-56 object-cover rounded-lg"
-            />
-
-            <h3 className="text-xl font-semibold mt-4">
-              Wireless Speaker
-            </h3>
-
-            <p className="text-gray-500 mt-2">
-              Powerful sound in a compact design.
-            </p>
-
-            <div className="flex justify-between items-center mt-4">
-              <span className="font-bold">$49.99</span>
-              <span className="text-yellow-500">⭐ 4.8</span>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
     </div>
